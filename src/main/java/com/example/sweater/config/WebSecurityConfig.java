@@ -1,6 +1,7 @@
 package com.example.sweater.config;
 
 import com.example.sweater.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -13,17 +14,17 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final UserService userSevice;
+    private final UserService userService;
 
-    public WebSecurityConfig(UserService userSevice) {
-        this.userSevice = userSevice;
+    public WebSecurityConfig(UserService userService) {
+        this.userService = userService;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/registration", "/static/**").permitAll()
+                .antMatchers("/", "/registration", "/static/**", "/activate/*").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -36,7 +37,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userSevice)
+        auth.userDetailsService(userService)
                 .passwordEncoder(NoOpPasswordEncoder.getInstance());
     }
 }

@@ -3,8 +3,12 @@ package com.example.sweater.controller;
 import com.example.sweater.domain.Role;
 import com.example.sweater.domain.User;
 import com.example.sweater.repos.UserRepo;
+import com.example.sweater.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Collections;
@@ -12,10 +16,10 @@ import java.util.Map;
 
 @Controller
 public class RegistrationController {
-    private final UserRepo userRepo;
+    private final UserService userSevice;
 
-    public RegistrationController(UserRepo userRepo) {
-        this.userRepo = userRepo;
+    public RegistrationController(UserService userSevice) {
+        this.userSevice = userSevice;
     }
 
     @GetMapping("/registration")
@@ -25,17 +29,24 @@ public class RegistrationController {
 
     @PostMapping("/registration")
     public String addUser(User user, Map<String, Object> model) {
-        User userFromDb = userRepo.findByUsername(user.getUsername());
-
-        if (userFromDb != null) {
+        if (!userSevice.addUser(user)) {
             model.put("message", "User exists!");
             return "registration";
         }
 
-        user.setActive(true);
-        user.setRoles(Collections.singleton(Role.USER));
-        userRepo.save(user);
-
         return "redirect:/login";
+    }
+
+    @GetMapping("/activate/{code}")
+    public String activate(Model model, @PathVariable String code) {
+        boolean isActivated = userSevice.activateUser(code);
+
+        if (isActivated) {
+            model.addAttribute("message", "User successfully activated");
+        } else {
+            model.addAttribute("message", "Activation code is not found!");
+        }
+
+        return "login";
     }
 }
