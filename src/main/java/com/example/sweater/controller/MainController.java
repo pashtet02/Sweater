@@ -1,10 +1,8 @@
 package com.example.sweater.controller;
 
-
 import com.example.sweater.domain.Message;
 import com.example.sweater.domain.User;
 import com.example.sweater.repos.MessageRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -26,11 +24,14 @@ import java.util.UUID;
 
 @Controller
 public class MainController {
-    @Autowired
-    private MessageRepo messageRepo;
+    private final MessageRepo messageRepo;
 
     @Value("${upload.path}")
     private String uploadPath;
+
+    public MainController(MessageRepo messageRepo) {
+        this.messageRepo = messageRepo;
+    }
 
     @GetMapping("/")
     public String greeting(Map<String, Object> model) {
@@ -109,6 +110,10 @@ public class MainController {
     ) {
         Set<Message> messages = user.getMessages();
 
+        model.addAttribute("userChannel", user);
+        model.addAttribute("subscriptionsCount", user.getSubscriptions().size());
+        model.addAttribute("subscribersCount", user.getSubscribers().size());
+        model.addAttribute("isSubscriber", user.getSubscribers().contains(currentUser));
         model.addAttribute("messages", messages);
         model.addAttribute("message", message);
         model.addAttribute("isCurrentUser", currentUser.equals(user));
@@ -126,11 +131,11 @@ public class MainController {
             @RequestParam("file") MultipartFile file
     ) throws IOException {
         if (message.getAuthor().equals(currentUser)) {
-            if (StringUtils.hasText(text)) {
+            if (!StringUtils.isEmpty(text)) {
                 message.setText(text);
             }
 
-            if (StringUtils.hasText(tag)) {
+            if (!StringUtils.isEmpty(tag)) {
                 message.setTag(tag);
             }
 

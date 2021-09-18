@@ -3,10 +3,11 @@ package com.example.sweater.domain.dto;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.io.Serializable;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CaptchaResponseDto {
+public class CaptchaResponseDto implements Serializable {
     private boolean success;
     @JsonAlias("error-codes")
     private Set<String> errorCodes;
